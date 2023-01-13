@@ -25,8 +25,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()  
         if user and user.check_password(password=form.password.data):
-            aaa = login_user(user)
-            print(aaa)
+            login_user(user)
             next_page = request.args.get('next')
             return redirect(next_page or url_for('main_bp.dashboard'))
         flash('Invalid username/password combination')
@@ -90,7 +89,7 @@ def load_user_from_request(request):
 def unauthorized():
     if request.blueprint == 'api_bp':
         abort(HTTPStatus.UNAUTHORIZED)
-    print('You must be logged in to view that page.')
+    flash('You must be logged in to view that page.')
     return redirect(url_for('auth_bp.login'))
 
 @user_loaded_from_request.connect

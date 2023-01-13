@@ -19,6 +19,5 @@ def dashboard():
 @login_required
 def logout():
     """User log-out logic."""
-    a = logout_user()
-    # print(a)
+    logout_user()
     return redirect(url_for('auth_bp.login'))
