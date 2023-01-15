@@ -1,0 +1,8 @@
+version: "3"
+services:
+  dnsrestapi:
+    image: dnsrestapi:latest
+    container_name: dnsrestapi
+    ports:
+      - 8000:8000
+    restart: unless-stopped
