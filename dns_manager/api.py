@@ -7,13 +7,13 @@ from .models import IotUser, db
 
 api_bp = Blueprint('api_bp', __name__, url_prefix = '/api')
 
-@api_bp.route("/get_all", methods=['GET'])
+@api_bp.route("/node", methods=['GET'])
 @login_required
 def get_all():
     rows = IotUser.query.filter_by(user_id=current_user.id).all()
-    return jsonify(rows)
+    return jsonify(rows), 200
 
-@api_bp.route("/create_iot", methods=['PUT'])
+@api_bp.route("/node", methods=['POST'])
 @login_required
 def register_new_iot():
     new_iot_params = json.loads(request.data)
@@ -25,9 +25,9 @@ def register_new_iot():
         iot_user.generate_api_key()
         db.session.add(iot_user)
         db.session.commit()  # Create new iot_user
-        return iot_user.api_key
+        return iot_user.api_key, 201
     elif '.' in new_iot_params['subdomain']:
-        abort(HTTPStatus.METHOD_NOT_ALLOWED)
+        return "", 400
     else:
-        abort(HTTPStatus.BAD_REQUEST)
+        return "", 400
 
