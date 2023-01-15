@@ -9,7 +9,7 @@
 
   {% if current_user.is_authenticated %}
     <p>Hi {{ current_user.name }}!</p>
-    <p>Your api-key: {{ current_user.master_api_key }}</p>
+    <p>Your api-key: {{ current_user.api_key }}</p>
     <a href="{{ url_for('main_bp.logout') }}">Log out</a>
   {% endif %}
 

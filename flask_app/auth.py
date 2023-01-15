@@ -23,7 +23,7 @@ def login():
     form = LoginForm()
     # Validate login attempt
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()  
+        user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(password=form.password.data):
             login_user(user)
             next_page = request.args.get('next')
@@ -46,8 +46,11 @@ def signup():
     """
     form = SignupForm()
     if form.validate_on_submit():
+        if '.' in form.domain.data:
+            flash('Subdomain name cannot have any dots.')
         existing_user = db.session.execute(db.select(User).filter_by(email=form.email.data)).first()
-        if existing_user is None:
+        existing_domain = db.session.execute(db.select(User).filter_by(domain=form.domain.data)).first()
+        if existing_user is None and existing_domain is None:
             user = User(
                 name=form.name.data,
                 email=form.email.data,
@@ -59,7 +62,10 @@ def signup():
             db.session.commit()  # Create new user
             login_user(user)  # Log in as newly created user
             return redirect(url_for('main_bp.dashboard'))
-        flash('A user already exists with that email address.')
+        elif existing_user is not None:
+            flash('A user already exists with that email address.')
+        elif existing_user is None and existing_domain is not None:
+            flash('This subdomain is already in use.')
     return render_template(
         'signup.jinja2',
         title='Create an Account.',
@@ -78,9 +84,9 @@ def load_user(user_id):
 def load_user_from_request(request):
     api_key = request.headers.get('X-Api-Key')
     if api_key:
-        user = db.session.execute(db.select(User).filter_by(master_api_key=api_key)).first()
+        user = User.query.filter_by(api_key=api_key).first()
         if user is not None:
-            return db.session.get(User, user.User.id)
+            return db.session.get(User, user.id)
         else:
             return None
     return None
