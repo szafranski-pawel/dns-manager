@@ -1,9 +1,9 @@
 FROM python:3
 
+RUN apt-get update && apt-get upgrade && apt-get -y install git htop nano && apt-get autoremove
+RUN git clone https://github.com/szafranski-pawel/dns-manager.git /app
+
 WORKDIR /app
-COPY flask_app flask_app/
-COPY setup.py .
-COPY MANIFEST.in .
 RUN pip3 install .
 RUN pip3 install gunicorn
 
