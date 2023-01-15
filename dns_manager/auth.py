@@ -1,10 +1,11 @@
+from functools import wraps
 from http import HTTPStatus
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for, g
+from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for, g
 from flask_login import current_user, login_user, user_loaded_from_request
 
 from . import login_manager
 from .forms import LoginForm, SignupForm
-from .models import User, db
+from .models import User, db, IotNode
 
 auth_bp = Blueprint('auth_bp', __name__)
 
@@ -85,19 +86,40 @@ def load_user_from_request(request):
     api_key = request.headers.get('X-Api-Key')
     if api_key:
         user = User.query.filter_by(api_key=api_key).first()
+        iot_node = IotNode.query.filter_by(api_key=api_key).first()
         if user is not None:
             return db.session.get(User, user.id)
+        elif iot_node is not None:
+            return db.session.get(IotNode, iot_node.id)
         else:
             return None
     return None
 
 @login_manager.unauthorized_handler
 def unauthorized():
-    if request.blueprint == 'api_bp':
-        abort(HTTPStatus.UNAUTHORIZED)
+    if request.blueprint in ['api_bp', 'dns_bp']:
+        return "", 401
     flash('You must be logged in to view that page.')
     return redirect(url_for('auth_bp.login'))
 
 @user_loaded_from_request.connect
 def load_user_from_request(self, user=None):
     g.login_via_request = True
+
+def roles_required(*role_names):
+    def decorator_roles_required(func):
+        @wraps(func)
+        def decorated_view(*args, **kwargs):
+            if current_app.config.get("LOGIN_DISABLED"):
+                pass
+            elif not current_user.is_authenticated:
+                return current_app.login_manager.unauthorized()
+            elif not current_user.has_roles(role_names):
+                return current_app.login_manager.unauthorized()
+            # flask 1.x compatibility
+            # current_app.ensure_sync is only available in Flask >= 2.0
+            if callable(getattr(current_app, "ensure_sync", None)):
+                return current_app.ensure_sync(func)(*args, **kwargs)
+            return func(*args, **kwargs)
+        return decorated_view
+    return decorator_roles_required

@@ -1,84 +1,108 @@
-from flask_login import UserMixin
+from functools import wraps
+
+from flask import current_app
+from flask_login import UserMixin, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 import secrets
 from dataclasses import dataclass
 
 from . import db
+
+node_role = 'Node'
+user_role = 'User'
+
 @dataclass
 class User(UserMixin, db.Model):
-	id: int
-	name: str
-	email: str
-	domain: str
-	api_key: str
-	iot_users: "IotUser"
+    id: int
+    name: str
+    email: str
+    domain: str
+    api_key: str
+    iot_users: "IotNode"
 
-	id = db.Column(
-		db.Integer,
-		primary_key=True
-	)
-	name = db.Column(
-		db.String(100),
-		nullable=False,
-		unique=False
-	)
-	email = db.Column(
-		db.String(64),
-		unique=True,
-		nullable=False
-	)
-	password = db.Column(
-		db.String(200),
-		primary_key=False,
-		unique=False,
-		nullable=False
-	)
-	domain = db.Column(
-		db.String(64),
-		unique=True,
-		nullable=False
-	)
-	api_key = db.Column(
-		db.String(200),
-		unique=True,
-		nullable=False
-	)
-	iot_users = db.relationship("IotUser")
+    roles_list = [node_role, user_role]
 
-	def set_password(self, password):
-		self.password = generate_password_hash(password)
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+    name = db.Column(
+        db.String(100),
+        nullable=False,
+        unique=False
+    )
+    email = db.Column(
+        db.String(64),
+        unique=True,
+        nullable=False
+    )
+    password = db.Column(
+        db.String(200),
+        primary_key=False,
+        unique=False,
+        nullable=False
+    )
+    domain = db.Column(
+        db.String(64),
+        unique=True,
+        nullable=False
+    )
+    api_key = db.Column(
+        db.String(200),
+        unique=True,
+        nullable=False
+    )
+    iot_users = db.relationship("IotNode")
 
-	def check_password(self, password):
-		return check_password_hash(self.password, password)
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
 
-	def generate_api_key(self):
-		self.api_key = secrets.token_hex(32)
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
+    def generate_api_key(self):
+        self.api_key = secrets.token_hex(32)
+
+    def has_roles(self, requirements):
+        for req in requirements:
+            if req not in self.roles_list:
+                return False
+        return True
+
 
 @dataclass
-class IotUser(db.Model):
-	id: int
-	# user_id: id
-	domain: str
-	api_key: str
+class IotNode(UserMixin, db.Model):
+    id: int
+    # user_id: id
+    domain: str
+    api_key: str
 
-	id = db.Column(
-		db.Integer,
-		primary_key=True
-	)
-	user_id = db.Column(
-		db.Integer,
-		db.ForeignKey(User.id)
-	)
-	domain = db.Column(
-		db.String(64),
-		unique=True,
-		nullable=False
-	)
-	api_key = db.Column(
-		db.String(200),
-		unique=True,
-		nullable=False
-	)
+    roles_list = ['Node']
 
-	def generate_api_key(self):
-		self.api_key = secrets.token_hex(32)
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(User.id)
+    )
+    domain = db.Column(
+        db.String(64),
+        unique=True,
+        nullable=False
+    )
+    api_key = db.Column(
+        db.String(200),
+        unique=True,
+        nullable=False
+    )
+
+    def generate_api_key(self):
+        self.api_key = secrets.token_hex(32)
+
+    def has_roles(self, requirements):
+        for req in requirements:
+            if req not in self.roles_list:
+                return False
+        return True
