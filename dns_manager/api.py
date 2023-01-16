@@ -1,5 +1,5 @@
 import json
-from flask import Blueprint, abort, request, jsonify
+from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from .models import IotNode, db, user_role
 from .auth import roles_required
@@ -9,14 +9,14 @@ api_bp = Blueprint('api_bp', __name__, url_prefix = '/api')
 @api_bp.route("/node", methods=['GET'])
 @login_required
 @roles_required(user_role)
-def get_all():
+def get_iot():
     rows = IotNode.query.filter_by(user_id=current_user.id).all()
     return jsonify(rows), 200
 
 @api_bp.route("/node", methods=['POST'])
 @login_required
 @roles_required(user_role)
-def register_new_iot():
+def register_iot():
     new_iot_params = json.loads(request.data)
     if 'subdomain' in new_iot_params and '.' not in new_iot_params['subdomain']:
         iot_user = IotNode(

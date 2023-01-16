@@ -1,6 +1,5 @@
 from functools import wraps
-from http import HTTPStatus
-from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for, g
+from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for, g
 from flask_login import current_user, login_user, user_loaded_from_request
 
 from . import login_manager

@@ -1,7 +1,7 @@
 import dataclasses
 import datetime
 from json import JSONEncoder
-from flask import Flask, g
+from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
@@ -26,6 +26,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['FLASK_PYDANTIC_VALIDATION_ERROR_RAISE'] = False
     app.json_encoder = CustomJSONEncoder
 
     db.init_app(app)
@@ -35,9 +36,11 @@ def create_app():
         from . import auth
         from . import main
         from . import api
+        from . import dns
         app.register_blueprint(auth.auth_bp)
         app.register_blueprint(main.main_bp)
         app.register_blueprint(api.api_bp)
+        app.register_blueprint(dns.dns_bp)
 
         db.create_all()
 

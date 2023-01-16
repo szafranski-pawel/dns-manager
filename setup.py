@@ -13,6 +13,8 @@ setup(
         'flask_wtf',
         'dnspython',
         'email-validator',
-        'blinker'
+        'blinker',
+        'pydantic',
+        'flask_pydantic'
     ],
 )

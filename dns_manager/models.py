@@ -1,7 +1,5 @@
 from functools import wraps
-
-from flask import current_app
-from flask_login import UserMixin, current_user
+from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 import secrets
 from dataclasses import dataclass

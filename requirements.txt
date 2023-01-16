@@ -6,3 +6,5 @@ flask_login
 flask_sqlalchemy
 flask_wtf
 wtforms
+pydantic
+flask_pydantic
