@@ -4,7 +4,7 @@ from flask_login import current_user, login_user, user_loaded_from_request
 
 from . import login_manager
 from .forms import LoginForm, SignupForm
-from .models import User, db, IotNode
+from .models import User, db, UserNode
 
 auth_bp = Blueprint('auth_bp', __name__)
 
@@ -47,7 +47,7 @@ def signup():
     form = SignupForm()
     if form.validate_on_submit():
         if '.' in form.domain.data:
-            flash('Subdomain name cannot have any dots.')
+            flash('Domain name cannot have any dots.')
         existing_user = db.session.execute(db.select(User).filter_by(email=form.email.data)).first()
         existing_domain = db.session.execute(db.select(User).filter_by(domain=form.domain.data)).first()
         if existing_user is None and existing_domain is None:
@@ -85,11 +85,13 @@ def load_user_from_request(request):
     api_key = request.headers.get('X-Api-Key')
     if api_key:
         user = User.query.filter_by(api_key=api_key).first()
-        iot_node = IotNode.query.filter_by(api_key=api_key).first()
+        iot_node = UserNode.query.filter_by(api_key=api_key).first()
         if user is not None:
+            current_app.logger.info('logged in successfully')
             return db.session.get(User, user.id)
         elif iot_node is not None:
-            return db.session.get(IotNode, iot_node.id)
+            current_app.logger.info('logged in successfully')
+            return db.session.get(UserNode, iot_node.id)
         else:
             return None
     return None
