@@ -1,10 +1,11 @@
 from functools import wraps
+import os
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for, g
 from flask_login import current_user, login_user, user_loaded_from_request
 
 from . import login_manager
 from .forms import LoginForm, SignupForm
-from .models import User, db, UserNode
+from .models import User, db, UserNode, Admin
 
 auth_bp = Blueprint('auth_bp', __name__)
 
@@ -18,10 +19,9 @@ def login():
     """
     # Bypass if user is logged in
     if current_user.is_authenticated:
-        return redirect(url_for('main_bp.dashboard'))  
+        return redirect(url_for('main_bp.dashboard'))
 
     form = LoginForm()
-    # Validate login attempt
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(password=form.password.data):
@@ -59,8 +59,8 @@ def signup():
             user.set_password(form.password.data)
             user.generate_api_key()
             db.session.add(user)
-            db.session.commit()  # Create new user
-            login_user(user)  # Log in as newly created user
+            db.session.commit()
+            login_user(user)
             return redirect(url_for('main_bp.dashboard'))
         elif existing_user is not None:
             flash('A user already exists with that email address.')
@@ -92,6 +92,8 @@ def load_user_from_request(request):
         elif iot_node is not None:
             current_app.logger.info('logged in successfully')
             return db.session.get(UserNode, iot_node.id)
+        elif api_key == os.environ['ADMIN_API_KEY']:
+            return Admin()
         else:
             return None
     return None

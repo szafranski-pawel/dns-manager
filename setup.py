@@ -15,6 +15,7 @@ setup(
         'email-validator',
         'blinker',
         'pydantic',
-        'flask_pydantic'
+        'flask_pydantic',
+        'email-validator'
     ],
 )

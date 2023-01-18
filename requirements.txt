@@ -8,3 +8,4 @@ flask_wtf
 wtforms
 pydantic
 flask_pydantic
+email-validator

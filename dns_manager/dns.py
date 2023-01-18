@@ -192,8 +192,7 @@ def modify_record(domain: str, body: RecordsSet):
 
     try:
         tcpquery(action)
-    except Exception as E:
-        logger.debug(E)
+    except Exception:
         return "", 400
 
     return jsonify(body.after.dict()), 200
