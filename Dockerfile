@@ -1,6 +1,7 @@
 FROM python:3
 
 RUN apt-get update && apt-get upgrade && apt-get -y install git htop nano && apt-get autoremove
+RUN pip install git+https://github.com/szafranski-pawel/dnspython.git
 RUN git clone https://github.com/szafranski-pawel/dns-manager.git /app
 
 WORKDIR /app
