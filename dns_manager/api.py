@@ -158,15 +158,23 @@ def register_node(body: NodeBodyPost):
         return "", 400
 
 
+@validate()
+def check_privileges_and_return_node(id: str):
+    if user_role in current_user.roles_list and admin_role not in current_user.roles_list:
+        node = UserNode.query.filter((UserNode.user_id==current_user.id) & (UserNode.id==id)).first()
+    elif admin_role in current_user.roles_list or node_role in current_user.roles_list: # last condition for calls from /my_node
+        node = UserNode.query.filter(UserNode.id==id).first()
+    else:
+        node = None
+    return node
+
+
 @api_bp.route("/node/<id>", methods=['GET'])
 @login_required
 @roles_required(user_role)
 @validate()
 def get_node(id: str):
-    if admin_role in current_user.roles_list or node_role in current_user.roles_list: # last condition for calls from /my_node
-        node = UserNode.query.filter(UserNode.id==id).first()
-    else:
-        node = UserNode.query.filter((UserNode.user_id==current_user.id) & (UserNode.id==id)).first()
+    node = check_privileges_and_return_node(id)
     if not node:
         return "", 404
     return jsonify(node), 200
@@ -177,10 +185,7 @@ def get_node(id: str):
 @roles_required(user_role)
 @validate()
 def delete_node(id: str):
-    if admin_role in current_user.roles_list or node_role in current_user.roles_list: # last condition for calls from /my_node
-        node = UserNode.query.filter(UserNode.id==id).first()
-    else:
-        node = UserNode.query.filter((UserNode.user_id==current_user.id) & (UserNode.id==id)).first()
+    node = check_privileges_and_return_node(id)
     if not node:
         return "", 404
     db.session.delete(node)
@@ -193,10 +198,7 @@ def delete_node(id: str):
 @roles_required(user_role)
 @validate()
 def modify_node(id: str, body: NodeBodyPut):
-    if admin_role in current_user.roles_list or node_role in current_user.roles_list: # last condition for calls from /my_node
-        node = UserNode.query.filter(UserNode.id==id).first()
-    else:
-        node = UserNode.query.filter((UserNode.user_id==current_user.id) & (UserNode.id==id)).first()
+    node = check_privileges_and_return_node(id)
     if not node:
         return "", 404
     if body.subdomain and not UserNode.query.filter((UserNode.domain==body.subdomain) & (UserNode.user_id==current_user.id)).first():
