@@ -10,5 +10,5 @@ RUN pip3 install gunicorn
 
 EXPOSE 8000
 
-CMD ["python3", "-m" , "gunicorn", "--bind", "0.0.0.0:8000", "-w", "2", "dns_manager:create_app()"]
+CMD ["python3", "-m" , "gunicorn", "--bind", "0.0.0.0:8000", "-w", "2", "--log-level", "debug", "dns_manager:create_app()"]
 # CMD ["tail", "-f", "/dev/null"]
