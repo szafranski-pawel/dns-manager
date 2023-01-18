@@ -110,7 +110,6 @@ def update_action():  # helper function
     return dns.update.Update(VALID_ZONE, keyring=TSIG) # this is always the base
 
 
-@validate()
 def check_privileges(domain: str):
     if admin_role in current_user.roles_list:
         return True

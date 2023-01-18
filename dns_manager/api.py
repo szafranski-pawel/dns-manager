@@ -92,7 +92,7 @@ def add_user(body: UserBodyPost):
     user.generate_api_key()
     db.session.add(user)
     db.session.commit()
-    return jsonify(user), 200
+    return jsonify(user), 201
 
 
 @api_bp.route("/user/<id>", methods=['GET'])
@@ -192,7 +192,6 @@ def register_node(body: NodeBodyPost):
         return "", 400
 
 
-@validate()
 def check_privileges_and_return_node(id: str):
     if user_role in current_user.roles_list and admin_role not in current_user.roles_list:
         node = UserNode.query.filter((UserNode.user_id==current_user.id) & (UserNode.id==id)).first()
