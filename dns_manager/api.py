@@ -28,7 +28,26 @@ class NodeBodyPut(BaseModel):
         return v
 
 
-class UserBody(BaseModel):
+class UserBodyPost(BaseModel):
+    name: str
+    email: EmailStr
+    password: SecretStr
+    subdomain: str
+
+    @validator('subdomain')
+    def subdomain_cannnot_contain_dot(cls, v):
+        if v and '.' in v:
+            raise ValueError('domain name cannot contain dot')
+        return v
+
+    @validator('password')
+    def password_min_length(cls, v):
+        if len(v) < 8:
+            raise ValueError('password must be at least 8 chars')
+        return v
+
+
+class UserBodyPut(BaseModel):
     name: Optional[str] = ""
     email: Optional[EmailStr] = ""
     password: Optional[SecretStr] = ""
@@ -59,6 +78,23 @@ def get_users():
     return jsonify(users), 200
 
 
+@api_bp.route("/user", methods=['POST'])
+@login_required
+@roles_required(admin_role)
+@validate()
+def add_user(body: UserBodyPost):
+    user = User(
+        name=body.name,
+        email=body.email,
+        domain=body.subdomain
+    )
+    user.set_password(body.password.get_secret_value())
+    user.generate_api_key()
+    db.session.add(user)
+    db.session.commit()
+    return jsonify(user), 200
+
+
 @api_bp.route("/user/<id>", methods=['GET'])
 @login_required
 @roles_required(admin_role)
@@ -86,7 +122,7 @@ def delete_user(id: str):
 @login_required
 @roles_required(admin_role)
 @validate()
-def modify_user(id: str, body: UserBody):
+def modify_user(id: str, body: UserBodyPut):
     user = User.query.filter_by(id=id).first()
     if not user:
         return "", 404
@@ -108,7 +144,6 @@ def modify_user(id: str, body: UserBody):
 @api_bp.route("/my_user", methods=['GET'])
 @login_required
 @roles_required(user_role)
-@validate()
 def get_my_user():
     return get_user.__wrapped__.__wrapped__(id=current_user.id)
 
@@ -116,7 +151,6 @@ def get_my_user():
 @api_bp.route("/my_user", methods=['DELETE'])
 @login_required
 @roles_required(user_role)
-@validate()
 def delete_my_user():
     return delete_user.__wrapped__.__wrapped__(id=current_user.id)
 
@@ -125,7 +159,7 @@ def delete_my_user():
 @login_required
 @roles_required(user_role)
 @validate()
-def modify_my_user(body: UserBody):
+def modify_my_user(body: UserBodyPut):
     return modify_user.__wrapped__.__wrapped__(id=current_user.id, body=body)
 
 
