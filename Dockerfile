@@ -7,6 +7,7 @@ RUN git clone https://github.com/szafranski-pawel/dns-manager.git /app
 WORKDIR /app
 RUN pip3 install .
 RUN pip3 install gunicorn
+RUN mkdir -p /srv/dns_manager
 
 EXPOSE 8000
 
