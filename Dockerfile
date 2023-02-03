@@ -9,7 +9,7 @@ RUN pip3 install .
 RUN pip3 install gunicorn
 RUN mkdir -p /srv/dns_manager
 
-EXPOSE 8000
+EXPOSE 80
 
-CMD ["python3", "-m" , "gunicorn", "--bind", "0.0.0.0:8000", "-w", "2", "--log-level", "debug", "dns_manager:create_app()"]
+CMD ["python3", "-m" , "gunicorn", "--bind", "0.0.0.0:80", "-w", "2", "--log-level", "debug", "dns_manager:create_app()"]
 # CMD ["tail", "-f", "/dev/null"]
