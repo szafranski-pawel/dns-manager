@@ -1,0 +1,29 @@
+### Add new user json
+{
+    "name": "put_user_name",
+    "email": "some_valid_email",
+    "subdomain": "jakas_domena",
+    "password": "haslo"
+}
+
+### Add new dns record
+{
+    "record_type": "TXT",
+    "record_value": "TEST_1"
+}
+
+### Modify dns record
+{
+    "before": {
+        "record_type": "TXT",
+        "record_value": "TEST_1"
+    },
+    "after": {
+        "record_type": "TXT",
+        "record_value": "TEST_2"
+    }
+}
+
+{
+    "subdomain": "test-4"
+}

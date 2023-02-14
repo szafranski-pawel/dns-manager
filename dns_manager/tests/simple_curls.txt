@@ -1,0 +1,40 @@
+### ADMIN REQUESTS
+# Get all users
+curl -X GET --location dns-manager.elka-dns.pl/api/user -H "Content-Type: application/json" -H "X-Api-Key: API_KEY"
+# Get whole zone
+
+### USER REQUESTS
+# Get info about me (my user)
+curl -X GET --location dns-manager.elka-dns.pl/api/my_user -H "Content-Type: application/json" -H "X-Api-Key: API_KEY"
+
+# add node
+curl -X POST --location dns-manager.elka-dns.pl/api/node -H "Content-Type: application/json" -H "X-Api-Key: API_KEY" -d '{ "subdomain": "test-4" }'
+
+
+### DNS REQUESTS
+# Get all records for given domain
+curl -X GET --location dns-manager.elka-dns.pl/api/dns/record/elka-dns.pl -H "Content-Type: application/json" -H "X-Api-Key: API_KEY"
+
+# Get A records for given domain
+curl -X GET --location dns-manager.elka-dns.pl/api/dns/record/elka-dns.pl?record_type=A -H "Content-Type: application/json" -H "X-Api-Key: API_KEY"
+
+# Add new record
+curl -X POST --location dns-manager.elka-dns.pl/api/dns/record/jan.elka-dns.pl -H "Content-Type: application/json" -H "X-Api-Key: API_KEY"  -d '{
+    "record_type": "TXT",
+    "record_value": "TEST_1"
+}'
+
+# Modify old record
+curl -X PUT --location dns-manager.elka-dns.pl/api/dns/record/jan.elka-dns.pl -H "Content-Type: application/json" -H "X-Api-Key: API_KEY" -d '{ "before": { "record_type": "TXT", "record_value": "TEST_1" }, "after": { "record_type": "TXT", "record_value": "TEST_2" } }'
+
+# Delete dns record
+curl -X DELETE --location dns-manager.elka-dns.pl/api/dns/record/jan.elka-dns.pl -H "Content-Type: application/json" -H "X-Api-Key: API_KEY"  -d '{
+    "record_type": "TXT",
+    "record_value": "TEST_2"
+}'
+
+
+curl -X POST --location dns-manager.elka-dns.pl/api/dns/record/test-4.jan.elka-dns.pl -H "Content-Type: application/json" -H "X-Api-Key: API_KEY"  -d '{
+    "record_type": "A",
+    "record_value": "1.1.1.1"
+}'
